@@ -224,11 +224,13 @@ jobs:
           for f in "${APKS[@]}"; do
             # .../apk/<abi>/<debug|release>/app-....apk  → 取 <abi>
             abi="$(basename "$(dirname "$(dirname "$f")")")"
-            out="artifacts/HGhub_${VERSION}_${abi}.apk"
             if [ "$MODE" = "debug" ]; then
-              # Gradle 已用 debug keystore 签好，直接改名
+              # Gradle 已用 debug keystore 签好，直接改名。
+              # 文件名带 -debug：两种包体积、签名都不同，同名字太容易装错。
+              out="artifacts/HGhub_${VERSION}_${abi}-debug.apk"
               cp "$f" "$out"
             else
+              out="artifacts/HGhub_${VERSION}_${abi}.apk"
               # --v4-signing-enabled false：否则 apksigner 会额外要 idsig，部分安装器不认
               "$APKSIGNER" sign --ks "$KS" --ks-key-alias "$KEY_ALIAS" \
                 --ks-pass "pass:$STORE_PASSWORD" --key-pass "pass:$KEY_PASSWORD" \
